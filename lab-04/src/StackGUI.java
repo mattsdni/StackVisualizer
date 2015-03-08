@@ -62,16 +62,17 @@ public class StackGUI extends PApplet
 	 */
 	public void setup()
 	{
+		String dir = System.getProperty("user.dir");
 		size(400, 800, P2D); //make a 400x800 window with OpenGL
-		bg = loadImage("../Data/bg.png");
-		close = loadImage("../Data/close.png");
-		close_i = loadImage("../Data/close_i.png");
-		arrow = loadImage("../Data/arrow.png");
-		convertB = loadImage("../Data/convert.png");
-		nextB = loadImage("../Data/pop.png");
-		convertB_i = loadImage("../Data/convert_i.png");
-		nextB_i = loadImage("../Data/pop_i.png");
-		font = createFont("../Data/arialbd.ttf", 24);
+		bg = loadImage(dir + "\\data\\bg.png");
+		close = loadImage(dir + "\\Data\\close.png");
+		close_i = loadImage(dir + "\\Data\\close_i.png");
+		arrow = loadImage(dir + "\\Data\\arrow.png");
+		convertB = loadImage(dir + "\\Data\\convert.png");
+		nextB = loadImage(dir + "\\Data\\pop.png");
+		convertB_i = loadImage(dir + "\\Data\\convert_i.png");
+		nextB_i = loadImage(dir + "\\Data\\pop_i.png");
+		font = createFont(dir + "\\Data\\arialbd.ttf", 24);
 		textFont(font, 24);
 		
 		converter = new InfixToPostfix();
@@ -199,19 +200,25 @@ public class StackGUI extends PApplet
 		  // If the return key is pressed, save the String and clear it
 		  if (key == '\n' ) 
 		  {
-			  if (input.length() == 0)
+			  if (typing.length() > 0 && !stackExists)
 			  {
 				  inputText();
 				  CreateVisualStack();
 			  }
-			  else
-				  if (step < nodeStatusArray.length)
-					{
-						initStackState();
-						UpdateVisualStack();
-					}
-				  
-		  } 
+			  else //step through the stack process
+			  {
+				  if (typing.length() > 0)
+				  {
+					  if (step < nodeStatusArray.length)
+					  {
+						  initStackState();
+						  UpdateVisualStack();
+					  }
+				  }
+			  }
+					
+		  }
+
 		  else if (key == BACKSPACE)
 		  {
 			  if (typing.length() > 0)
@@ -232,7 +239,7 @@ public class StackGUI extends PApplet
 		}
 		if (mouseX > convertX && mouseX < convertX+convertB.width && mouseY > convertY && mouseY < convertY+convertB.height)
 		{
-			if (step < nodeStatusArray.length)
+			if (typing.length() > 0 && !stackExists)
 			{
 				inputText();
 				CreateVisualStack();
