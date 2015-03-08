@@ -14,21 +14,27 @@ public class StackGUI extends PApplet
 	PImage close_i;
 	PImage arrow;
 	PImage convertB;
-	PImage popB;
+	PImage nextB;
 	PImage convertB_i;
-	PImage popB_i;
+	PImage nextB_i;
 	
 	PFont font;
 	GUIstackNode[] nodes = new GUIstackNode[10];
+	String [][] nodeStatusArray;
 	int stackSize = 0;
 	int closeX = 361, closeY = 5;
 	int convertX = 312, convertY = 51;
-	int popX = 319, popY = 99;
+	int nextX = 319, nextY = 99;
 	String input = "";
 	String typing = "";
 	int index;
+	int step = 0; //which step in the stack conversion are we on
+	boolean stackExists = false;
+	boolean showResult = false;
+	String result = ""; //result of the conversion
 	
 	LinkedStack<String> l1;
+	InfixToPostfix converter;
 	/**
 	 * program insertion point
 	 */
@@ -62,20 +68,13 @@ public class StackGUI extends PApplet
 		close_i = loadImage("../Data/close_i.png");
 		arrow = loadImage("../Data/arrow.png");
 		convertB = loadImage("../Data/convert.png");
-		popB = loadImage("../Data/pop.png");
+		nextB = loadImage("../Data/pop.png");
 		convertB_i = loadImage("../Data/convert_i.png");
-		popB_i = loadImage("../Data/pop_i.png");
+		nextB_i = loadImage("../Data/pop_i.png");
 		font = createFont("../Data/arialbd.ttf", 24);
 		textFont(font, 24);
 		
-		l1 = new LinkedStack<String>(this);
-		l1.push("20");
-		
-		CreateVisualStack(l1.toString());
-		
-		InfixToPostfix converter = new InfixToPostfix();
-		converter.convert("( 6 + 20 )* 5 - 12 / 4)");
-
+		converter = new InfixToPostfix();
 	}
 	/**
 	 * the infinite loop used to execute all commands in the gui while running
@@ -85,8 +84,100 @@ public class StackGUI extends PApplet
 		image(bg, 0, 0);
 		image(close, closeX, closeY);
 		image(convertB, convertX, convertY);
-		image(popB, popX, popY);
+		image(nextB, nextX, nextY);
 		
+		checkMouse();
+		DrawVisualStack();
+		textAlign(RIGHT);
+		text(typing,298,80);
+		if (showResult)
+		{
+			textAlign(LEFT);
+			text("Postfix: " + result, 10, 120);
+		}
+	}
+	
+	/**
+	 * creates a linked list of stack node objects that can be drawn to the screen
+	 * @param stack: a string representation of the stack
+	 */
+	public void CreateVisualStack()
+	{
+		index = 0;
+		//create top node
+		nodes[9] = new GUIstackNode(this, "top");
+		stackExists = true;
+	}
+	
+	/**
+	 * updates the nodes array to match current stack state
+	 */
+	public void UpdateVisualStack()
+	{
+		//erase gui nodes
+		for (int i = 0; i < 9; i++)
+			nodes[i] = null;
+		//add current state elements to gui stack
+		for(int i = nodeStatusArray[step].length-1; i >= 0; i--)
+			nodes[i] = new GUIstackNode(this, i, nodeStatusArray[step][nodeStatusArray[step].length-1-i]); 
+		stackSize = nodeStatusArray[step].length;
+		step++;
+		if (step >= nodeStatusArray.length)
+		{
+			stackSize = 0;
+			showResult = true;
+		}
+	}
+	
+	/**
+	 * calls the display function of every stack node
+	 */
+	public void DrawVisualStack()
+	{
+		if(stackExists)
+		{
+			if (step < nodeStatusArray.length)
+			{
+				nodes[9].display();
+			}
+			for (int i = 0; i < stackSize; i++)
+			{
+				nodes[i].display();
+			}
+		}
+	}
+	
+	/**
+	 * initializes a 2d string array containing all states of the stack
+	 */
+	public void initStackState()
+	{
+		String[] s_nodes = converter.stackTrace;
+		int sNodeSize = 0;
+		//find length of array not including null values
+		for (int i = 0; i < s_nodes.length; i++)
+		{
+			if (s_nodes[i] != null)
+				sNodeSize++;
+		}
+		//copy non null values into new array
+		String[] sArray = new String[sNodeSize];
+		for (int i = 0; i <sNodeSize; i++)
+		{
+			sArray[i] = s_nodes[i];
+		}
+		nodeStatusArray = new String[sArray.length][]; //global 2d string array to hold stack states
+		
+		for (int i = 0; i < sArray.length; i++)
+		{
+			nodeStatusArray[i] = sArray[i].split("\n");
+		}
+	}
+	/**
+	 * checks whether the mouse is over a button
+	 */
+	public void checkMouse()
+	{
 		if (mouseX > 360 && mouseX < 360+close.width && mouseY > 5 && mouseY < 5+close.height)
 		{
 			image(close_i, closeX, closeY);
@@ -95,51 +186,9 @@ public class StackGUI extends PApplet
 		{
 			image(convertB_i, convertX, convertY);
 		}
-		if (mouseX > popX && mouseX < popX+popB.width && mouseY > popY && mouseY < popY+popB.height)
+		if (mouseX > nextX && mouseX < nextX+nextB.width && mouseY > nextY && mouseY < nextY+nextB.height)
 		{
-			image(popB_i, popX, popY);
-		}
-		DrawVisualStack();
-		textAlign(RIGHT);
-		text(typing,298,80);
-	}
-	
-	/**
-	 * creates a linked list of stack node objects that can be drawn to the screen
-	 * @param stack: a string representation of the stack
-	 */
-	public void CreateVisualStack(String stack)
-	{
-		//parse the stack string to create the nodes
-		String[] s_nodes = stack.split("\n");
-		stackSize = s_nodes.length;
-		index = 0;
-		//create top node
-		nodes[9] = new GUIstackNode(this, "top");
-		//create nodes
-		for (int i = stackSize-1; i >= 0; i--)
-		{
-			nodes[index] = new GUIstackNode(this, index, s_nodes[i]);
-			index++;
-		}
-	}
-	
-	public void UpdateVisualStack()
-	{
-		String[] s_nodes = l1.toString().split("\n");
-		stackSize = s_nodes.length;
-		nodes[index] = new GUIstackNode(this, index, s_nodes[0]); //add the element on top of stack
-		index++;
-	}
-	/**
-	 * calls the display function of every stack node
-	 */
-	public void DrawVisualStack()
-	{
-		nodes[9].display();
-		for (int i = 0; i < stackSize; i++)
-		{
-			nodes[i].display();
+			image(nextB_i, nextX, nextY);
 		}
 	}
 	/**
@@ -150,7 +199,18 @@ public class StackGUI extends PApplet
 		  // If the return key is pressed, save the String and clear it
 		  if (key == '\n' ) 
 		  {
-			  inputText();
+			  if (input.length() == 0)
+			  {
+				  inputText();
+				  CreateVisualStack();
+			  }
+			  else
+				  if (step < nodeStatusArray.length)
+					{
+						initStackState();
+						UpdateVisualStack();
+					}
+				  
 		  } 
 		  else if (key == BACKSPACE)
 		  {
@@ -172,11 +232,20 @@ public class StackGUI extends PApplet
 		}
 		if (mouseX > convertX && mouseX < convertX+convertB.width && mouseY > convertY && mouseY < convertY+convertB.height)
 		{
-			inputText();
+			if (step < nodeStatusArray.length)
+			{
+				inputText();
+				CreateVisualStack();
+			}
 		}
-		if (mouseX > popX && mouseX < popX+popB.width && mouseY > popY && mouseY < popY+popB.height)
+		if (mouseX > nextX && mouseX < nextX+nextB.width && mouseY > nextY && mouseY < nextY+nextB.height)
 		{
-			//pop the stack and update
+			//go to the next step in the stack process if there is one
+			if (step < nodeStatusArray.length)
+			{
+				initStackState();
+				UpdateVisualStack();
+			}
 		}
 	}
 	
@@ -195,10 +264,10 @@ public class StackGUI extends PApplet
 			convertY = 52;
 			
 		}
-		if (mouseX > popX && mouseX < popX+popB.width && mouseY > popY && mouseY < popY+popB.height)
+		if (mouseX > nextX && mouseX < nextX+nextB.width && mouseY > nextY && mouseY < nextY+nextB.height)
 		{
-			popX = 320;
-			popY = 100;
+			nextX = 320;
+			nextY = 100;
 		}
 		
 	}
@@ -210,8 +279,8 @@ public class StackGUI extends PApplet
 		closeY = 5;
 		convertX = 312;
 		convertY = 51;
-		popX = 319;
-		popY = 99;
+		nextX = 319;
+		nextY = 99;
 	}
 	
 	public void mouseDragged()
@@ -221,19 +290,7 @@ public class StackGUI extends PApplet
 		frame.setLocation(point.x + (mouseX - mx), point.y + (mouseY - my));
 		dragging = true;
 	}
-	
-	/**
-	 * draws a node in the stack visualizer gui
-	 * @param contents of the node
-	 */
-	public void drawNode(String contents)
-	{
-		fill(2,181,230);
-		noStroke();
-		rect(75,150, 100,100);
-		fill(255);
-		text(contents, 100, 200);
-	}
+
 	/**
 	 * takes the input and passes it on to the stack updater
 	 */
@@ -243,15 +300,12 @@ public class StackGUI extends PApplet
 		if (typing.length() > 0)
 		{
 			input = typing;
-			l1.push(input);
-			input = ""; 
-			typing = "";
+			result = converter.convert(input);
+			initStackState();
 			UpdateVisualStack();
 		}
 	}
 	public StackGUI()
 	{
-		// TODO Auto-generated constructor stub
 	}
-
 }

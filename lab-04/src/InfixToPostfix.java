@@ -1,3 +1,19 @@
+//Name: Matt Dennie
+//Assignment: Lab 04
+//Title: Infix to Postfix Converter
+//Course: CSCE 270
+//Lab Section: 11:50
+//Semester: Spring, 2015
+//Instructor: Laurie Murphy
+//Date: 3/7/2015
+//sources consulted: 
+//Program description: 
+  //Converts infix expressions to postfix
+  //The stack visualizer gui can be run from the StackGUI.java class. You can type in the infix 
+  //expression and press enter, or click 'convert'. You can then continue to press enter or 
+  //click 'next' to step through the conversion process.
+//Known Bugs: none
+//Creativity: GUI implemented to visualize stack during conversion, spaces not required as delimiter
 
 public class InfixToPostfix
 {
@@ -70,6 +86,18 @@ public class InfixToPostfix
 		postfix = addSpaces(postfix, infix);
 		
 		return postfix;
+	}
+	
+	private static String parseInput(String input)
+	{
+		for (int i = 0; i < input.length(); i++)
+		{
+			if (isOperator(""+input.charAt(i)) || input.charAt(i) == '('|| input.charAt(i) == ')')
+			{
+				input = new StringBuilder(input).insert(i+1, " ").toString();
+			}
+		}
+		return input;
 	}
 	
 	//returns an int representing the precedence of an operator

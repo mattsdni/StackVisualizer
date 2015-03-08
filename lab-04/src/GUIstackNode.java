@@ -44,8 +44,7 @@ public class GUIstackNode
 	
 	void display()
 	{
-		//parent.fill(2,181,230);
-		parent.fill(180);
+		parent.fill(2,181,230);
 		parent.noStroke();
 		parent.rect(x, y, sizeX, sizeY);
 		parent.fill(255);

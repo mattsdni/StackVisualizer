@@ -10,6 +10,7 @@ public class LinkedStackTest
 	public void test()
 	{
 		l1 = new LinkedStack<Integer>();
+		InfixToPostfix converter = new InfixToPostfix();
 		
 		System.out.println("Empty?: " + l1.isEmpty());
 		System.out.println("size: " + l1.size());
@@ -35,8 +36,7 @@ public class LinkedStackTest
 		
 		String infix1 = "( 6 + 20 )* 5 - 12 / 4";
 		String infix2 = "7 - 3 * 2";
-		//assertEquals("6 20 + 5 * 12 4 / -",InfixToPostfix.convert(infix1));
-		//assertEquals("7 3 2 * -",InfixToPostfix.convert(infix2));
+		assertEquals("6 20 + 5 * 12 4 / -",converter.convert(infix1));
+		assertEquals("7 3 2 * -",converter.convert(infix2));
 	}
-
 }
